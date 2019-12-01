@@ -1,0 +1,23 @@
+package com.grpc.serverstream.server;
+
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+
+import java.io.IOException;
+
+public class PrimeNumDecompServer {
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        Server server = ServerBuilder.forPort(9090).addService(new PrimeNumDecompServerImpl()).build();
+
+        server.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread( () -> {
+            System.out.println("Request for Shutdown Received");
+            server.shutdown();
+            System.out.println("Server Shutdown");
+        }));
+
+        server.awaitTermination();
+    }
+}

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package primenum;
+
+option java_package = "com.gRPC.server.primenum";
+option java_multiple_files = true;
+
+message PrimeNumDecomRequest {
+    int32 prime_number = 1;
+}
+
+message PrimeNumDecomResponse {
+    int32 result = 1;
+}
+
+service PrimeNumDecompService {
+    rpc PrimeNumDecomp(PrimeNumDecomRequest) returns (stream PrimeNumDecomResponse) {};
+}
