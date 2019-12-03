@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package compute;
+
+option java_package = "com.grpc.client.compute";
+option java_multiple_files = true;
+
+message ComputeAverageRequest {
+    int32 number_data = 1;
+}
+
+message ComputeAverageResponse {
+    float result = 1;
+}
+
+service ComputeAverageService {
+    // Client Stream Service
+    rpc ComputeAverage(stream ComputeAverageRequest) returns (ComputeAverageResponse) {};
+}
