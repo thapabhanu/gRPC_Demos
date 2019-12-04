@@ -46,6 +46,8 @@ public class GreetingClient {
             }
         });
 
+        req.onCompleted();
+
         try {
             latch.await(3L, TimeUnit.SECONDS);
         } catch (InterruptedException e) {

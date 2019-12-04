@@ -50,6 +50,14 @@ message SquareRootResponse {
     double number_root = 1;
 }
 
+message GreetWithDeadlineRequest {
+    Greeting greeting = 1;
+}
+
+message GreetWithDeadlineResponse {
+    string result = 1;
+}
+
 service GreetingService {
     // Unary
     rpc Greet(GreetRequest) returns (GreetResponse) {};
@@ -65,4 +73,7 @@ service GreetingService {
 
     // Server throwing error in case service request is negative number
     rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse) {};
+
+    // rpc call with deadline of 300 ms
+    rpc GreetWithDeadline(GreetWithDeadlineRequest) returns (GreetWithDeadlineResponse) {};
 }
