@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package routeguide;
+
+option java_multiple_files = true;
+option java_package = "com.grpc.examples.routeguide";
+option java_outer_classname = "RouteGuideProto";
+option objc_class_prefix = "RTG";
+
+service RouteGuide {
+
+}
+
+// Point is latitude and longitude pair
+message Point {
+    int32 latitude = 1;
+    int32 longitude = 2;
+}
+// Lat long Rectangle represent diagonally opposite lo and hi points
+message Rectangle {
+    Point lo = 1;
+    Point hi = 2;
+}
+// A features name something at given point
+message Feature {
+    string name = 1;
+    Point location = 2;
+}
+message FeatureDatabase {
+    repeated Feature feature = 1;
+}
+message RouteNote{
+    // The location from which the message is sent
+    Point location = 1;
+    // The message to be sent
+    string message = 2;
+}
+// The RouteSummary is received in response to a RecordRoute rpc
+message RouteSummary {
+    int32 point_count = 1;
+    int32 feature_count = 2;
+    int32 distance = 3;
+    int32 elapsed_time = 4;
+}
