@@ -8,7 +8,13 @@ option java_outer_classname = "RouteGuideProto";
 option objc_class_prefix = "RTG";
 
 service RouteGuide {
-
+    rpc getFeature(Point) returns (Feature) {};
+    // A server-to-client streaming RPC.
+    rpc ListFeatures(Rectangle) returns (stream Feature) {};
+    // A client-to-server streaming RPC.
+    rpc RouteRecords(stream Point) returns (RouteSummary) {};
+    // A Bidirectional streaming RPC.
+    rpc RouteChat(stream RouteNote) returns (stream RouteNote) {};
 }
 
 // Point is latitude and longitude pair
