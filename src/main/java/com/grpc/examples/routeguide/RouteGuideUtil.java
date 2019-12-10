@@ -24,6 +24,7 @@ public class RouteGuideUtil {
     }
 
     public static URL getDefaultFeaturesFile() {
+
         return RouteGuideServer.class.getResource("route_guide_db.json");
     }
 
@@ -43,5 +44,7 @@ public class RouteGuideUtil {
         }
         return db.getFeatureList();
     }
-
+    public static boolean exist(com.grpc.examples.routeguide.Feature feature){
+        return feature!=null && !feature.getName().isEmpty();
+    }
 }
