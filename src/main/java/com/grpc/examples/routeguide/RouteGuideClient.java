@@ -4,7 +4,13 @@ import com.grpc.examples.routeguide.Point;
 import com.grpc.examples.routeguide.Rectangle;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,6 +21,8 @@ public class RouteGuideClient {
     private ManagedChannel channel;
     com.grpc.examples.routeguide.RouteGuideGrpc.RouteGuideBlockingStub blkStub;
     com.grpc.examples.routeguide.RouteGuideGrpc.RouteGuideStub asyncStub;
+
+    private Random random = new Random();
 
     public RouteGuideClient(String host, int port) {
         this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
@@ -45,11 +53,94 @@ public class RouteGuideClient {
                     feature.getLocation().getLatitude(), feature.getLocation().getLongitude());
         });
     }
+    public void recordRoute(List<com.grpc.examples.routeguide.Feature> featureList, int numPoints){
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        StreamObserver requestObserver = asyncStub.routeRecords(new StreamObserver<com.grpc.examples.routeguide.RouteSummary>() {
+            @Override
+            public void onNext(com.grpc.examples.routeguide.RouteSummary value) {
+                System.out.println("Response"+ value.toString());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                countDownLatch.countDown();
+            }
+        });
+
+        for(int i=0; i<numPoints; i++) {
+            int index = random.nextInt(featureList.size());
+            Point point = featureList.get(index).getLocation();
+            requestObserver.onNext(point);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        requestObserver.onCompleted();
+
+        try {
+            countDownLatch.await(1000, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void routeChat(){
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<com.grpc.examples.routeguide.RouteNote> reqObserver =
+                asyncStub.routeChat(new StreamObserver<com.grpc.examples.routeguide.RouteNote>() {
+            @Override
+            public void onNext(com.grpc.examples.routeguide.RouteNote value) {
+                System.out.println("RounteChat Response");
+                System.out.println(value.getMessage());
+                System.out.println(value.getLocation().toString());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                latch.countDown();
+            }
+        });
+
+        //reqObserver.onNext();
+        reqObserver.onCompleted();
+
+        try {
+            latch.await(300, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
+
+        List<com.grpc.examples.routeguide.Feature> features;
+        try {
+            features = RouteGuideUtil.parseFeatures(RouteGuideUtil.getDefaultFeaturesFile());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        }
+
         RouteGuideClient client = new RouteGuideClient("localhost", 50051);
         client.getFeatures(413628156, -749015468);
-        client.listFeatures(413628156, -749015468, 419999544, -740371136);
+        //client.listFeatures(413628156, -749015468, 419999544, -740371136);
+        client.recordRoute(features, 10);
     }
 
     private static void info(String msg, Object... params){

@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 public class RouteGuideServiceImpl extends com.grpc.examples.routeguide.RouteGuideGrpc.RouteGuideImplBase {
 
@@ -58,5 +59,69 @@ public class RouteGuideServiceImpl extends com.grpc.examples.routeguide.RouteGui
             }
         }
         responseObserver.onCompleted();
+    }
+
+    // A client-to-server streaming RPC.
+    @Override
+    public StreamObserver<com.grpc.examples.routeguide.Point> routeRecords(
+                        StreamObserver<com.grpc.examples.routeguide.RouteSummary> responseObserver) {
+
+        return new StreamObserver<com.grpc.examples.routeguide.Point>() {
+            int featureCount = 0;
+            int distance = 0;
+            com.grpc.examples.routeguide.Point previous;
+            final long startTime = System.nanoTime();
+
+            @Override
+            public void onNext(com.grpc.examples.routeguide.Point value) {
+                if(RouteGuideUtil.exist(checkFeature(value))) {
+                    featureCount++;
+                }
+                if (previous!=null) {
+                    distance += RouteGuideUtil.calcDistance(previous, value);
+                }
+                previous = value;
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                long seconds = NANOSECONDS.toSeconds(System.nanoTime() - startTime);
+                responseObserver.onNext(com.grpc.examples.routeguide.RouteSummary.newBuilder()
+                        .setFeatureCount(featureCount).setDistance(distance)
+                        .setElapsedTime((int)seconds)
+                        .build());
+                responseObserver.onCompleted();
+            }
+        };
+    }
+
+    @Override
+    public StreamObserver<com.grpc.examples.routeguide.RouteNote> routeChat(
+                            StreamObserver<com.grpc.examples.routeguide.RouteNote> responseObserver) {
+        System.out.println("Executing server.routeChat method......");
+        StreamObserver<com.grpc.examples.routeguide.RouteNote> requestObserver =
+                                        new StreamObserver<com.grpc.examples.routeguide.RouteNote>() {
+            @Override
+            public void onNext(com.grpc.examples.routeguide.RouteNote value) {
+
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        };
+
+        return requestObserver;
     }
 }
