@@ -117,6 +117,12 @@ public class RouteGuideClient {
             }
         });
 
+        com.grpc.examples.routeguide.RouteNote[] notes =   {newNote("First message", 0, 0), newNote("Second message", 0, 1),
+                newNote("Third message", 1, 0), newNote("Fourth message", 1, 1)};
+
+        for(com.grpc.examples.routeguide.RouteNote note: notes) {
+            reqObserver.onNext(note);
+        }
         //reqObserver.onNext();
         reqObserver.onCompleted();
 
@@ -125,6 +131,11 @@ public class RouteGuideClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private com.grpc.examples.routeguide.RouteNote newNote(String msg, int x, int y) {
+        return com.grpc.examples.routeguide.RouteNote.newBuilder().setMessage(msg)
+                .setLocation(Point.newBuilder().setLatitude(x).setLongitude(y)).build();
     }
 
     public static void main(String[] args) {
@@ -141,6 +152,7 @@ public class RouteGuideClient {
         client.getFeatures(413628156, -749015468);
         //client.listFeatures(413628156, -749015468, 419999544, -740371136);
         client.recordRoute(features, 10);
+        client.routeChat();
     }
 
     private static void info(String msg, Object... params){

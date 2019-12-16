@@ -2,7 +2,13 @@ package com.grpc.examples.routeguide;
 
 import io.grpc.stub.StreamObserver;
 import com.grpc.examples.routeguide.*;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -108,20 +114,36 @@ public class RouteGuideServiceImpl extends com.grpc.examples.routeguide.RouteGui
                                         new StreamObserver<com.grpc.examples.routeguide.RouteNote>() {
             @Override
             public void onNext(com.grpc.examples.routeguide.RouteNote value) {
+                List<com.grpc.examples.routeguide.RouteNote> rnList = getOrCreateNote(value.getLocation());
 
+                for(com.grpc.examples.routeguide.RouteNote prevNote: rnList.toArray(new com.grpc.examples.routeguide.RouteNote[0])) {
+                    responseObserver.onNext(prevNote);
+                }
+
+                rnList.add(value);
             }
 
             @Override
             public void onError(Throwable t) {
-
+                // Error condition
             }
 
             @Override
             public void onCompleted() {
-
+                responseObserver.onCompleted();
             }
         };
 
         return requestObserver;
+    }
+
+    private ConcurrentMap<com.grpc.examples.routeguide.Point, List<com.grpc.examples.routeguide.RouteNote>> routesNotes =
+                    new ConcurrentHashMap<com.grpc.examples.routeguide.Point, List<com.grpc.examples.routeguide.RouteNote>>();
+
+    private List<com.grpc.examples.routeguide.RouteNote> getOrCreateNote(com.grpc.examples.routeguide.Point location) {
+        List<com.grpc.examples.routeguide.RouteNote> notes = Collections.synchronizedList(new ArrayList<com.grpc.examples.routeguide.RouteNote>());
+        List<com.grpc.examples.routeguide.RouteNote> prevNotes = routesNotes.putIfAbsent(location, notes);
+
+        return prevNotes!=null? prevNotes: notes;
     }
 }

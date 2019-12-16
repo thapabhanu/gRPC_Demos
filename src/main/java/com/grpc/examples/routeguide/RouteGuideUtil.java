@@ -46,17 +46,14 @@ public class RouteGuideUtil {
         }
         return db.getFeatureList();
     }
+
     public static boolean exist(com.grpc.examples.routeguide.Feature feature){
         return feature!=null && !feature.getName().isEmpty();
     }
 
     /**
      * Calculate the distance between two points using the "haversine" formula.
-     * The formula is based on http://mathforum.org/library/drmath/view/51879.html.
-     *
-     * @param start The starting point
-     * @param end The end point
-     * @return The distance between the points in meters
+     * This method copied from gRPC code example directly
      */
     public static int calcDistance(com.grpc.examples.routeguide.Point start, com.grpc.examples.routeguide.Point end) {
         int r = 6371000; // earth radius in meters
