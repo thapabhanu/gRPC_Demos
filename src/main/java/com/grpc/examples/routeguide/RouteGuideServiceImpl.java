@@ -106,6 +106,11 @@ public class RouteGuideServiceImpl extends com.grpc.examples.routeguide.RouteGui
         };
     }
 
+    /**
+     *
+     * @param responseObserver
+     * @return
+     */
     @Override
     public StreamObserver<com.grpc.examples.routeguide.RouteNote> routeChat(
                             StreamObserver<com.grpc.examples.routeguide.RouteNote> responseObserver) {
